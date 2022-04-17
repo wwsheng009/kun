@@ -42,7 +42,11 @@ func MapOf(values interface{}) Map {
 		valuesMap := map[string]interface{}{}
 		typeOfS := reflectValues.Type()
 		for i := 0; i < reflectValues.NumField(); i++ {
-			name := share.GetTagName(typeOfS.Field(i), "json")
+			field := typeOfS.Field(i)
+			if field.PkgPath != "" {
+				continue
+			}
+			name := share.GetTagName(field, "json")
 			valuesMap[name] = reflectValues.Field(i).Interface()
 		}
 		return Map{MapStrAny: maps.MapStrAnyOf(valuesMap)}
