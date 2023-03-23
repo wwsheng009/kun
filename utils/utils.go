@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -36,7 +38,21 @@ func Dump(values ...interface{}) {
 			continue
 		}
 		jsoniter.Unmarshal(txt, &res)
-		s, _ := f.Marshal(res)
-		fmt.Printf("%s\n", s)
+		// s, _ := f.Marshal(res)
+		// fmt.Printf("%s\n", s)
+		s, _ := UnescapeJsonMarshal(res)
+		fmt.Printf("%s", s) //返回值已带有\n
 	}
+}
+
+// https://blog.csdn.net/zhuhanzi/article/details/106156174
+// 修正console.log输出html符号异常
+func UnescapeJsonMarshal(jsonRaw interface{}) ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	//带有缩进的格式化
+	encoder.SetIndent("", "    ")
+	err := encoder.Encode(jsonRaw)
+	return buffer.Bytes(), err
 }
