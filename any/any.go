@@ -266,6 +266,9 @@ func (v Any) CFloat64() float64 {
 	if v.IsString() && v.String() == "" {
 		return 0
 	}
+	if v.IsString() && strings.ToLower(v.String()) == "null" {
+		return 0
+	}
 
 	value, err := strconv.ParseFloat(fmt.Sprintf("%v", v.value), 64)
 	if err != nil {
