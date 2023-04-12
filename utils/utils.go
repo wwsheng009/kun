@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/TylerBrock/colorjson"
+	"github.com/fatih/color"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -18,30 +19,39 @@ func DD(values ...interface{}) {
 
 // Dump The Dump function dumps the given variables:
 func Dump(values ...interface{}) {
+
 	f := colorjson.NewFormatter()
 	f.Indent = 4
 	for _, v := range values {
-		var res interface{}
+
 		if err, ok := v.(error); ok {
-			fmt.Printf("%s\n", err.Error())
+			color.Red(err.Error())
 			continue
 		}
 
-		// to Map
-		if value, ok := v.(interface{ Map() map[string]interface{} }); ok {
-			v = value.Map()
-		}
+		switch v.(type) {
 
-		txt, err := jsoniter.Marshal(v)
-		if err != nil {
-			fmt.Printf("%#v\n%s\n", v, err)
+		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
+			color.Cyan(fmt.Sprintf("%v", v))
 			continue
+
+		case string, []byte:
+			color.Green(fmt.Sprintf("%s", v))
+			continue
+
+		default:
+			var res interface{}
+			txt, err := jsoniter.Marshal(v)
+			if err != nil {
+				color.Red(err.Error())
+				continue
+			}
+
+			jsoniter.Unmarshal(txt, &res)
+			// s, _ := f.Marshal(res)
+			s, _ := UnescapeJsonMarshal(res)
+			fmt.Printf("%s\n", s)
 		}
-		jsoniter.Unmarshal(txt, &res)
-		// s, _ := f.Marshal(res)
-		// fmt.Printf("%s\n", s)
-		s, _ := UnescapeJsonMarshal(res)
-		fmt.Printf("%s", s) //返回值已带有\n
 	}
 }
 
